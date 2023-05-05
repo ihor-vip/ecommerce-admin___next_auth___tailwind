@@ -21,7 +21,14 @@ function Categories({swal}) {
     }
     async function saveCategory(ev) {
         ev.preventDefault();
-        const data = {name, parentCategory};
+        const data = {
+            name,
+            parentCategory,
+            properties: properties.map(property => ({
+                name: property.name,
+                values: property.values.split(',')
+            })
+        )};
 
         if (editedCategory) {
             await axios.put('/api/categories', {...data, _id: editedCategory._id});
@@ -30,6 +37,8 @@ function Categories({swal}) {
             await axios.post('/api/categories', data);
         }
         setName('');
+        setParentCategory('');
+        setProperties([]);
         fetchCategories();
     }
 
@@ -37,6 +46,10 @@ function Categories({swal}) {
         setEditedCategory(category);
         setName(category.name);
         setParentCategory(category.parent?._id);
+        setProperties(category.properties.map(({name, values}) => ({
+            name,
+            values: values.join(',')
+        })));
     }
 
     function deleteCategory(category){
@@ -132,7 +145,7 @@ function Categories({swal}) {
                                     className="mb-0"
                                     value={property.values}
                                     onChange={(ev) => handlePropertyValuesChange(index, property, ev.target.value)}
-                                    placeholder="values"
+                                    placeholder="values(add them separated by ' , ')"
                                 />
 
                                 <button type="button" onClick={() => removeProperty(index)} className="btn-default">Remove</button>
@@ -140,18 +153,36 @@ function Categories({swal}) {
                         ))}
                     </div>
 
-                    <button type='submit' className="btn-primary py-1">Save</button>
+                    <div className="flex gap-1">
+                        {editedCategory && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setEditedCategory(null);
+                                    setName('');
+                                    setParentCategory('');
+                                    setProperties([]);
+                                }}
+                                className="btn-default"
+                            >
+                                Cancel
+                            </button>
+                        )}
+
+                        <button type='submit' className="btn-primary py-1">Save</button>
+                    </div>
                 </form>
 
-                <table className="basic mt-4">
-                    <thead>
+                {!editedCategory && (
+                    <table className="basic mt-4">
+                        <thead>
                         <tr>
                             <td>Category name</td>
                             <td>Parent category</td>
                             <td></td>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         {categories.length > 0 && categories.map(category => (
                             <tr>
                                 <td>{category.name}</td>
@@ -162,8 +193,9 @@ function Categories({swal}) {
                                 </td>
                             </tr>
                         ))}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                )}
             </Layout>
         </div>
     )
