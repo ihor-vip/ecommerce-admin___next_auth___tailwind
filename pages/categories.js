@@ -78,6 +78,14 @@ function Categories({swal}) {
             return properties;
         })
     }
+
+    function removeProperty(indexToRemove) {
+        setProperties(prev => {
+            return [...prev].filter((property, propertyIndex) => {
+                return propertyIndex !== indexToRemove;
+            });
+        })
+    }
     return (
         <div>
             <Layout>
@@ -110,9 +118,10 @@ function Categories({swal}) {
                         <button type="button" onClick={addProperty} className="btn-default text-sm mb-2">Add new property</button>
 
                         {properties.length > 0 && properties.map((property, index) => (
-                            <div className="flex gap-1">
+                            <div className="flex gap-1 mb-2">
                                 <input
                                     type="text"
+                                    className="mb-0"
                                     value={property.name}
                                     onChange={(ev) => handlePropertyNameChange(index, property, ev.target.value)}
                                     placeholder="property name (example: color)"
@@ -120,10 +129,13 @@ function Categories({swal}) {
 
                                 <input
                                     type="text"
+                                    className="mb-0"
                                     value={property.values}
                                     onChange={(ev) => handlePropertyValuesChange(index, property, ev.target.value)}
                                     placeholder="values"
                                 />
+
+                                <button type="button" onClick={() => removeProperty(index)} className="btn-default">Remove</button>
                             </div>
                         ))}
                     </div>
