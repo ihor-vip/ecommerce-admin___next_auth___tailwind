@@ -5,7 +5,7 @@ import clientPromise from "@/lib/mongodb";
 
 const adminEmails = [process.env.ADMIN_EMAIL];
 
-export default NextAuth({
+export const authOptions = {
     providers: [
         // OAuth authentication providers...
         GoogleProvider({
@@ -23,4 +23,15 @@ export default NextAuth({
             }
         },
     }
-})
+}
+
+export default NextAuth(authOptions);
+
+export async function isAdminRequest(req,res) {
+    const session = await getServerSession(req,res,authOptions);
+    if (!adminEmails.includes(session?.user?.email)) {
+        res.status(401);
+        res.end();
+        throw 'not an admin';
+    }
+}
